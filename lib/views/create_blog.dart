@@ -1,10 +1,12 @@
 import 'dart:io';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_blogs_firebase/services/crud.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:random_string/random_string.dart';
 
 class Create_Blog extends StatefulWidget {
   @override
@@ -15,6 +17,7 @@ class _Create_BlogState extends State<Create_Blog> {
   late String authorName, title, desc;
   CRUDmethods cruDmethods = new CRUDmethods();
   var _image;
+  bool isLoading = false;
 
   getImagefromGallery() async {
     PickedFile? pickedFile = await ImagePicker().getImage(
@@ -27,9 +30,20 @@ class _Create_BlogState extends State<Create_Blog> {
     }
   }
 
-  uploadBlog() {
+  uploadBlog() async{
     if(_image != null){
-      
+      setState(() {
+        isLoading = true;
+      });
+      WidgetsFlutterBinding.ensureInitialized();
+      await Firebase.initializeApp();
+      Reference firebasestorage = FirebaseStorage.instance.ref().child("blogImages").child("${randomAlphaNumeric(9)}.jpg");
+      final UploadTask task = firebasestorage.putFile(_image);
+      var downloadUrl = await (await task).ref.getDownloadURL();
+      print("This is url $downloadUrl");
+      Navigator.pop(context);
+    }else{
+
     }
   }
 
@@ -55,7 +69,9 @@ class _Create_BlogState extends State<Create_Blog> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
               onTap: (){
-                uploadBlog()
+                debugPrint("Uploading");
+                uploadBlog();
+                debugPrint("Uploaded");
               },
               child: Icon(
                 Icons.upload,
@@ -65,7 +81,10 @@ class _Create_BlogState extends State<Create_Blog> {
           // Icon(Icons.save),
         ],
       ),
-      body: Container(
+      body: isLoading ? Container(
+        alignment: Alignment.center,
+        child: CircularProgressIndicator(),
+      ) : Container(
         padding: EdgeInsets.all(10),
         child: Column(
           children: <Widget>[

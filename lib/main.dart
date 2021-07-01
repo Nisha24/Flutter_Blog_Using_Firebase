@@ -1,3 +1,4 @@
+// --no-sound-null-safety
 import 'package:flutter/material.dart';
 import 'package:flutter_blogs_firebase/home.dart';
 
