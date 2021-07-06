@@ -41,7 +41,15 @@ class _Create_BlogState extends State<Create_Blog> {
       final UploadTask task = firebasestorage.putFile(_image);
       var downloadUrl = await (await task).ref.getDownloadURL();
       print("This is url $downloadUrl");
-      Navigator.pop(context);
+      Map<String , String> map = {
+        "imageUrl" : downloadUrl,
+        "authorName" : authorName,
+        "title" : title,
+        "desc" : desc
+      };
+      cruDmethods.addData(map).then((value) {
+        Navigator.pop(context);
+      });
     }else{
 
     }
